@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
 # 打卡脚修改自ZJU-nCov-Hitcarder的开源代码，感谢这位同学开源的代码
+# captcha by AlexanderLake
 
 import requests
 import json
 import re
 import datetime
 import time
+import ddddocr
 import sys
 
 
@@ -29,6 +31,7 @@ class DaKa(object):
         self.login_url = "https://zjuam.zju.edu.cn/cas/login?service=https%3A%2F%2Fhealthreport.zju.edu.cn%2Fa_zju%2Fapi%2Fsso%2Findex%3Fredirect%3Dhttps%253A%252F%252Fhealthreport.zju.edu.cn%252Fncov%252Fwap%252Fdefault%252Findex"
         self.base_url = "https://healthreport.zju.edu.cn/ncov/wap/default/index"
         self.save_url = "https://healthreport.zju.edu.cn/ncov/wap/default/save"
+        self.captcha_url = "https://healthreport.zju.edu.cn/ncov/wap/default/code"
         self.headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36"
         }
@@ -89,25 +92,31 @@ class DaKa(object):
         except json.decoder.JSONDecodeError:
             raise DecodeError('JSON decode error')
 
+        # get Captcha
+        res = self.sess.get(self.captcha_url, headers=self.headers).content
+        captcha = ddddocr.DdddOcr().classification(res).upper()
+
         new_info = old_info.copy()
         new_info['id'] = new_id
         new_info['name'] = name
         new_info['number'] = number
         new_info["date"] = self.get_date()
         new_info["created"] = round(time.time())
-        new_info["address"] = "浙江省杭州市西湖区"
-        new_info["area"] = "浙江省 杭州市 西湖区"
-        new_info["province"] = new_info["area"].split(' ')[0]
-        new_info["city"] = new_info["area"].split(' ')[1]
+        #new_info["address"] = "浙江省杭州市西湖区"
+        #new_info["area"] = "浙江省 杭州市 西湖区"
+        #new_info["province"] = new_info["area"].split(' ')[0]
+        #new_info["city"] = new_info["area"].split(' ')[1]
         # form change
         new_info['jrdqtlqk[]'] = 0
-        new_info['jrdqjcqk[]'] = 0
-        new_info['sfsqhzjkk'] = 1   # 是否申领杭州健康码
+        #new_info['jrdqjcqk[]'] = 0
+        #new_info['sfsqhzjkk'] = 1   # 是否申领杭州健康码
         new_info['sqhzjkkys'] = 1   # 杭州健康吗颜色，1:绿色 2:红色 3:黄色
         new_info['sfqrxxss'] = 1    # 是否确认信息属实
-        new_info['jcqzrq'] = ""
-        new_info['gwszdd'] = ""
+        #new_info['jcqzrq'] = ""
+        #new_info['gwszdd'] = ""
         new_info['szgjcs'] = ""
+        new_info['verifyCode'] = captcha
+        
         self.info = new_info
         return new_info
 
