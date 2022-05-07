@@ -102,21 +102,21 @@ class DaKa(object):
         new_info['number'] = number
         new_info["date"] = self.get_date()
         new_info["created"] = round(time.time())
-        #new_info["address"] = "浙江省杭州市西湖区"
-        #new_info["area"] = "浙江省 杭州市 西湖区"
-        #new_info["province"] = new_info["area"].split(' ')[0]
-        #new_info["city"] = new_info["area"].split(' ')[1]
+        # new_info["address"] = "浙江省杭州市西湖区"
+        # new_info["area"] = "浙江省 杭州市 西湖区"
+        # new_info["province"] = new_info["area"].split(' ')[0]
+        # new_info["city"] = new_info["area"].split(' ')[1]
         # form change
         new_info['jrdqtlqk[]'] = 0
-        #new_info['jrdqjcqk[]'] = 0
-        #new_info['sfsqhzjkk'] = 1   # 是否申领杭州健康码
-        new_info['sqhzjkkys'] = 1   # 杭州健康吗颜色，1:绿色 2:红色 3:黄色
-        new_info['sfqrxxss'] = 1    # 是否确认信息属实
-        #new_info['jcqzrq'] = ""
-        #new_info['gwszdd'] = ""
+        # new_info['jrdqjcqk[]'] = 0
+        # new_info['sfsqhzjkk'] = 1   # 是否申领杭州健康码
+        new_info['sqhzjkkys'] = 1  # 杭州健康吗颜色，1:绿色 2:红色 3:黄色
+        new_info['sfqrxxss'] = 1  # 是否确认信息属实
+        # new_info['jcqzrq'] = ""
+        # new_info['gwszdd'] = ""
         new_info['szgjcs'] = ""
         new_info['verifyCode'] = captcha
-        
+
         self.info = new_info
         return new_info
 
@@ -176,11 +176,19 @@ def main(username, password):
 
     print('正在为您打卡打卡打卡')
     try:
-        res = dk.post()
-        if str(res['e']) == '0':
-            print('已为您打卡成功！')
-        else:
-            print(res['m'])
+        for i in range(5):
+            res = dk.post()
+            if str(res['e']) == '0':
+                print('已为您打卡成功！')
+                break
+            elif str(res['m']) == '今天已经填报了':
+                print('今天已经填报了')
+                break
+            else:
+                print(res['m'])
+                if i == 4:
+                    raise Exception
+                dk.get_info()
     except Exception:
         print('数据提交失败')
         raise Exception
@@ -189,6 +197,7 @@ def main(username, password):
 if __name__ == "__main__":
     username = sys.argv[1]
     password = sys.argv[2]
+    
     try:
         main(username, password)
     except Exception:
