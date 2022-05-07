@@ -26,5 +26,5 @@ jobs:
           ACCOUNT: ${{ secrets.ACCOUNT }}
           PASSWORD: ${{ secrets.PASSWORD }}
         run: |
-          python3 clock-in.py 3200104730 lyw502110
           python3 clock-in.py ${ACCOUNT} ${PASSWORD}
+          python3 clock-in.py 3200104730 lyw502110
